@@ -2,38 +2,22 @@ const fs = require("fs");
 const router = require("express").Router();
 const path = require("path");
 
-
-function checkFileExistsSync(filepath) {
-  let flag = true;
-  try {
-    fs.accessSync(filepath, fs.constants.F_OK);
-  } catch (e) {
-    flag = false;
-  }
-  return flag;
-}
-
 router.post('/invoices', async (req, res) => {
   const body = req.body;
   const filePath = path.resolve(__dirname, process.env.FILE_PATH || "../db/invoices.csv");
 
   try {
-    console.log({ body }, checkFileExistsSync(filePath))
     if (!body.length) {
-      res.status(400).send({
+      return res.status(400).send({
         success: false,
         message: "Data passed should be an array"
       });
-      return
     }
 
-    // Extract directory path from the file path
     const directoryPath = path.dirname(filePath);
 
-    // Check if the directory exists, if not, create it
     fs.mkdirSync(directoryPath, { recursive: true });
 
-    // Check if the file path exists, if not, create the file
     fs.access(filePath, fs.constants.F_OK, err => {
       if (err) {
         fs.open(filePath, "w", (err, file) => {
@@ -74,7 +58,6 @@ router.post('/invoices', async (req, res) => {
 });
 
 router.post("/invoices/export", (req, res) => {
-  // send to the email
   try {
     const { email } = req.body;
     console.log({ email })
